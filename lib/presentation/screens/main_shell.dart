@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'account_screen.dart';
 import 'home_screen.dart';
 import 'status_screen.dart';
@@ -27,13 +26,13 @@ class _MainShellState extends State<MainShell> {
       child: Scaffold(
         body: _pages[_index],
         bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (value) => setState(() => _index = value),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home), label: 'الرئيسية'),
-          NavigationDestination(icon: Icon(Icons.chat), label: 'الحالات'),
-          NavigationDestination(icon: Icon(Icons.person), label: 'حسابي'),
-        ],
+          selectedIndex: _index,
+          onDestinationSelected: (value) => setState(() => _index = value),
+          destinations: const [
+            NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'الرئيسية'),
+            NavigationDestination(icon: Icon(Icons.chat_bubble_outline), selectedIcon: Icon(Icons.chat_bubble), label: 'الحالات'),
+            NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'حسابي'),
+          ],
         ),
       ),
     );

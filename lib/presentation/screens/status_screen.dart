@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'create_status_screen.dart';
 
 class StatusScreen extends StatefulWidget {
@@ -17,63 +16,76 @@ class _StatusScreenState extends State<StatusScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        appBar: AppBar(title: const Text('الحالات')),
-        body: _items.isEmpty
-            ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('الحالات'),
+        centerTitle: true,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _openCreateStatus,
+        child: const Icon(Icons.add_rounded),
+      ),
+      body: _items.isEmpty
+          ? Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.chat_bubble_outline, size: 64,
+                  color: isDark ? Colors.white24 : Colors.grey.shade300),
+              const SizedBox(height: 16),
+              Text('لا توجد حالات بعد', style: theme.textTheme.titleMedium),
+              const SizedBox(height: 8),
+              Text('أنشئ حالة جديدة ليرى الجميع تحديثك.',
+                  textAlign: TextAlign.center, style: theme.textTheme.bodyMedium),
+            ],
+          ),
+        ),
+      )
+          : ListView.builder(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+        itemCount: _items.length,
+        itemBuilder: (context, index) {
+          final item = _items[index];
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E293B) : Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: isDark ? Colors.black26 : const Color(0x0F000000),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: const Color(0xFF2563EB).withOpacity(0.12),
+                  child: const Icon(Icons.chat_rounded, color: Color(0xFF2563EB)),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.chat_bubble_outline, size: 56, color: Colors.grey),
-                      const SizedBox(height: 12),
-                      const Text('لا توجد حالات بعد', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-                      const Text('أنشئ حالة جديدة ليرى الجميع تحديثك.', textAlign: TextAlign.center),
-                      const SizedBox(height: 16),
-                      ElevatedButton.icon(
-                        onPressed: _openCreateStatus,
-                        icon: const Icon(Icons.add),
-                        label: const Text('إضافة حالة'),
-                      ),
+                      Text(item.text, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 4),
+                      Text(item.time, style: theme.textTheme.bodyMedium),
                     ],
                   ),
                 ),
-              )
-            : ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: _items.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: ElevatedButton.icon(
-                        onPressed: _openCreateStatus,
-                        icon: const Icon(Icons.add_circle_outline),
-                        label: const Text('إضافة حالة جديدة'),
-                      ),
-                    );
-                  }
-
-                  final item = _items[index - 1];
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: ListTile(
-                      leading: const CircleAvatar(child: Icon(Icons.chat)),
-                      title: Text(item.text),
-                      subtitle: Text(item.time),
-                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    ),
-                  );
-                },
-              ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: _openCreateStatus,
-          child: const Icon(Icons.add),
-        ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -97,6 +109,5 @@ class _StatusScreenState extends State<StatusScreen> {
 class _StatusItem {
   final String text;
   final String time;
-
   const _StatusItem(this.text, this.time);
 }

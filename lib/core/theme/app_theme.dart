@@ -9,43 +9,43 @@ class AppTheme {
   static const textSecondary = Color(0xFF4B5563);
 
   static ThemeData get lightTheme => ThemeData(
-        useMaterial3: true,
-        fontFamily: 'Cairo',
-        colorScheme: ColorScheme.fromSeed(seedColor: primary, secondary: secondary),
-        scaffoldBackgroundColor: background,
-        cardColor: surface,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: background,
-          foregroundColor: textPrimary,
-          elevation: 0,
-        ),
-        textTheme: const TextTheme(
-          bodyLarge: TextStyle(color: textPrimary, fontSize: 16),
-          bodyMedium: TextStyle(color: textSecondary, fontSize: 14),
-          titleLarge: TextStyle(color: textPrimary, fontWeight: FontWeight.w700, fontSize: 20),
-          titleMedium: TextStyle(color: textPrimary, fontWeight: FontWeight.w700, fontSize: 18),
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: surface,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: primary,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            padding: const EdgeInsets.symmetric(vertical: 14),
-          ),
-        ),
-      );
+    useMaterial3: true,
+    fontFamily: 'Almarai',
+    colorScheme: ColorScheme.fromSeed(seedColor: primary, secondary: secondary),
+    scaffoldBackgroundColor: background,
+    cardColor: surface,
+    appBarTheme: const AppBarTheme(
+      backgroundColor: background,
+      foregroundColor: textPrimary,
+      elevation: 0,
+    ),
+    textTheme: const TextTheme(
+      bodyLarge: TextStyle(color: textPrimary, fontSize: 16),
+      bodyMedium: TextStyle(color: textSecondary, fontSize: 14),
+      titleLarge: TextStyle(color: textPrimary, fontWeight: FontWeight.w700, fontSize: 20),
+      titleMedium: TextStyle(color: textPrimary, fontWeight: FontWeight.w700, fontSize: 18),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: surface,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: primary,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        padding: const EdgeInsets.symmetric(vertical: 14),
+      ),
+    ),
+  );
 
   static ThemeData get darkTheme => ThemeData(
-        useMaterial3: true,
-        fontFamily: 'Cairo',
-        colorScheme: ColorScheme.fromSeed(seedColor: primary, secondary: secondary, brightness: Brightness.dark),
-        scaffoldBackgroundColor: const Color(0xFF0F172A),
-        cardColor: const Color(0xFF111827),
-        appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF0F172A), foregroundColor: Colors.white, elevation: 0),
-      );
+    useMaterial3: true,
+    fontFamily: 'Almarai',
+    colorScheme: ColorScheme.fromSeed(seedColor: primary, secondary: secondary, brightness: Brightness.dark),
+    scaffoldBackgroundColor: const Color(0xFF0F172A),
+    cardColor: const Color(0xFF111827),
+    appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF0F172A), foregroundColor: Colors.white, elevation: 0),
+  );
 }

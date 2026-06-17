@@ -6,22 +6,26 @@ class EditProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('تعديل الملف الشخصي')),
-      body: Padding(
+      appBar: AppBar(title: const Text('تعديل الملف الشخصي'), centerTitle: true),
+      body: ListView(
         padding: const EdgeInsets.all(16),
-        child: ListView(
-          children: const [
-            TextField(decoration: InputDecoration(labelText: 'الاسم الكامل')),
-            SizedBox(height: 12),
-            TextField(decoration: InputDecoration(labelText: 'المهنة')),
-            SizedBox(height: 12),
-            TextField(decoration: InputDecoration(labelText: 'نوع الخدمة')),
-            SizedBox(height: 12),
-            TextField(decoration: InputDecoration(labelText: 'العنوان')),
-            SizedBox(height: 18),
-            ElevatedButton(onPressed: null, child: Text('حفظ التغييرات')),
-          ],
-        ),
+        children: [
+          const TextField(decoration: InputDecoration(labelText: 'الاسم الكامل', prefixIcon: Icon(Icons.person_outline))),
+          const SizedBox(height: 14),
+          const TextField(decoration: InputDecoration(labelText: 'المهنة', prefixIcon: Icon(Icons.work_outline))),
+          const SizedBox(height: 14),
+          const TextField(decoration: InputDecoration(labelText: 'نوع الخدمة', prefixIcon: Icon(Icons.build_outlined))),
+          const SizedBox(height: 14),
+          const TextField(decoration: InputDecoration(labelText: 'العنوان', prefixIcon: Icon(Icons.location_on_outlined))),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('حفظ التغييرات'),
+            ),
+          ),
+        ],
       ),
     );
   }
