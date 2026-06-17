@@ -10,7 +10,7 @@ class AppTheme {
 
   static ThemeData get lightTheme => ThemeData(
     useMaterial3: true,
-    fontFamily: 'Almarai',
+    fontFamily: 'Tajawal',
     colorScheme: ColorScheme.fromSeed(seedColor: primary, secondary: secondary),
     scaffoldBackgroundColor: background,
     cardColor: surface,
@@ -42,7 +42,7 @@ class AppTheme {
 
   static ThemeData get darkTheme => ThemeData(
     useMaterial3: true,
-    fontFamily: 'Almarai',
+    fontFamily: 'Tajawal',
     colorScheme: ColorScheme.fromSeed(seedColor: primary, secondary: secondary, brightness: Brightness.dark),
     scaffoldBackgroundColor: const Color(0xFF0F172A),
     cardColor: const Color(0xFF111827),
