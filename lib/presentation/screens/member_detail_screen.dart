@@ -20,6 +20,34 @@ class FamilyMember {
     required this.workImages,
     required this.avatarColor,
   });
+
+  // تحويل بيانات العضو لصيغة يقدر Firestore يخزّنها
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'profession': profession,
+      'description': description,
+      'location': location,
+      'phone': phone,
+      'email': email,
+      'workImages': workImages,
+      'avatarColor': avatarColor.value, // نحوّل اللون لرقم صحيح
+    };
+  }
+
+  // تحويل بيانات Firestore رجوع لكلاس FamilyMember
+  factory FamilyMember.fromMap(Map<String, dynamic> map) {
+    return FamilyMember(
+      name: map['name'] ?? '',
+      profession: map['profession'] ?? '',
+      description: map['description'] ?? '',
+      location: map['location'] ?? '',
+      phone: map['phone'] ?? '',
+      email: map['email'] ?? '',
+      workImages: List<String>.from(map['workImages'] ?? []),
+      avatarColor: Color(map['avatarColor'] ?? 0xFF2563EB),
+    );
+  }
 }
 
 class MemberDetailScreen extends StatelessWidget {
@@ -90,7 +118,6 @@ class MemberDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // معلومات التواصل
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(20)),
@@ -105,8 +132,6 @@ class MemberDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-
-                  // نبذة
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
@@ -121,8 +146,6 @@ class MemberDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-
-                  // صور العمل
                   if (member.workImages.isNotEmpty) ...[
                     Text('صور من العمل', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor)),
                     const SizedBox(height: 10),

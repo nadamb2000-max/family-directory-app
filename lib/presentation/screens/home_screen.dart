@@ -1,109 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'member_detail_screen.dart';
-
-final List<FamilyMember> familyMembers = [
-  FamilyMember(
-    name: 'محمد أحمد',
-    profession: 'مهندس برمجيات',
-    description: 'مهندس برمجيات متخصص في تطوير تطبيقات الجوال وتقنيات الذكاء الاصطناعي. يعمل في إحدى كبرى شركات التقنية منذ أكثر من 8 سنوات، وله إسهامات في مشاريع دولية بارزة.',
-    location: 'الرياض، السعودية',
-    phone: '+966501234567',
-    email: 'mohammed@example.com',
-    workImages: ['1', '2', '3'],
-    avatarColor: const Color(0xFF2563EB),
-  ),
-  FamilyMember(
-    name: 'ليلى خالد',
-    profession: 'طبيبة متخصصة',
-    description: 'طبيبة متخصصة في طب الأطفال وحديثي الولادة. حاصلة على الزمالة الأمريكية في طب الأطفال، وتعمل في مستشفى الملك فيصل التخصصي منذ 6 سنوات.',
-    location: 'جدة، السعودية',
-    phone: '+966552345678',
-    email: 'layla@example.com',
-    workImages: ['1', '2'],
-    avatarColor: const Color(0xFF7C3AED),
-  ),
-  FamilyMember(
-    name: 'عمر سالم',
-    profession: 'محامٍ',
-    description: 'محامٍ متخصص في قضايا الشركات والعقود التجارية. أسس مكتبه القانوني الخاص عام 2018، ويتولى تمثيل عدد من كبرى الشركات في المنطقة.',
-    location: 'دبي، الإمارات',
-    phone: '+971503456789',
-    email: 'omar@example.com',
-    workImages: ['1', '2', '3', '4'],
-    avatarColor: const Color(0xFF059669),
-  ),
-  FamilyMember(
-    name: 'سارة يوسف',
-    profession: 'مصممة جرافيك',
-    description: 'مصممة جرافيك إبداعية متخصصة في الهوية البصرية وتصميم واجهات المستخدم. عملت مع أكثر من 50 علامة تجارية محلية وعربية خلال مسيرتها المهنية.',
-    location: 'القاهرة، مصر',
-    phone: '+201004567890',
-    email: 'sara@example.com',
-    workImages: ['1', '2', '3'],
-    avatarColor: const Color(0xFFDB2777),
-  ),
-  FamilyMember(
-    name: 'أحمد ناصر',
-    profession: 'مدرس رياضيات',
-    description: 'مدرس رياضيات في المرحلة الثانوية منذ 15 عاماً. حاصل على جائزة المعلم المتميز لثلاث سنوات متتالية، ومهتم بتطوير أساليب التدريس الحديثة.',
-    location: 'عمّان، الأردن',
-    phone: '+962795678901',
-    email: 'ahmed@example.com',
-    workImages: ['1'],
-    avatarColor: const Color(0xFFD97706),
-  ),
-  FamilyMember(
-    name: 'نور حسن',
-    profession: 'صيدلانية',
-    description: 'صيدلانية سريرية تعمل في قسم العناية المركزة. متخصصة في جرعات الأدوية الحرجة وتفاعلاتها الدوائية، وتشارك في برامج التوعية الصحية المجتمعية.',
-    location: 'بيروت، لبنان',
-    phone: '+961706789012',
-    email: 'nour@example.com',
-    workImages: ['1', '2'],
-    avatarColor: const Color(0xFF0891B2),
-  ),
-  FamilyMember(
-    name: 'خالد إبراهيم',
-    profession: 'مهندس مدني',
-    description: 'مهندس مدني متخصص في تصميم الجسور والأنفاق. شارك في تنفيذ عدد من المشاريع الكبرى في منطقة الخليج، وحاصل على عدة براءات اختراع في مجال الإنشاءات.',
-    location: 'الكويت',
-    phone: '+96597890123',
-    email: 'khaled@example.com',
-    workImages: ['1', '2', '3'],
-    avatarColor: const Color(0xFF64748B),
-  ),
-  FamilyMember(
-    name: 'رنا فاروق',
-    profession: 'كاتبة وصحفية',
-    description: 'كاتبة وصحفية متخصصة في الشأن الثقافي والاجتماعي. نشرت ثلاثة كتب أدبية وتكتب بانتظام في عدد من المجلات العربية المرموقة.',
-    location: 'تونس',
-    phone: '+21690901234',
-    email: 'rana@example.com',
-    workImages: ['1', '2'],
-    avatarColor: const Color(0xFFEA580C),
-  ),
-  FamilyMember(
-    name: 'يوسف منير',
-    profession: 'طيار',
-    description: 'طيار من الدرجة الأولى لدى إحدى شركات الطيران الخليجية الكبرى. يمتلك أكثر من 12,000 ساعة طيران، ومتخصص في قيادة طائرات الإيرباص A380.',
-    location: 'أبوظبي، الإمارات',
-    phone: '+971559012345',
-    email: 'yousef@example.com',
-    workImages: ['1', '2', '3'],
-    avatarColor: const Color(0xFF1D4ED8),
-  ),
-  FamilyMember(
-    name: 'هند سامي',
-    profession: 'مهندسة زراعية',
-    description: 'مهندسة زراعية متخصصة في تقنيات الزراعة المائية والذكية. تعمل على مشاريع الأمن الغذائي في منطقة الشرق الأوسط، وحاصلة على جوائز دولية في مجال الابتكار الزراعي.',
-    location: 'المغرب',
-    phone: '+212600123456',
-    email: 'hind@example.com',
-    workImages: ['1', '2'],
-    avatarColor: const Color(0xFF16A34A),
-  ),
-];
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -114,21 +12,12 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
-  List<FamilyMember> _filteredMembers = familyMembers;
+  String _searchQuery = '';
   bool _isSearching = false;
 
   void _onSearch(String query) {
     setState(() {
-      if (query.isEmpty) {
-        _filteredMembers = familyMembers;
-      } else {
-        final q = query.toLowerCase();
-        _filteredMembers = familyMembers.where((m) {
-          return m.name.toLowerCase().contains(q) ||
-              m.profession.toLowerCase().contains(q) ||
-              m.phone.replaceAll(' ', '').contains(q.replaceAll(' ', ''));
-        }).toList();
-      }
+      _searchQuery = query.toLowerCase();
     });
   }
 
@@ -137,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _isSearching = !_isSearching;
       if (!_isSearching) {
         _searchController.clear();
-        _filteredMembers = familyMembers;
+        _searchQuery = '';
       }
     });
   }
@@ -148,6 +37,15 @@ class _HomeScreenState extends State<HomeScreen> {
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     }
+  }
+
+  List<FamilyMember> _filterMembers(List<FamilyMember> members) {
+    if (_searchQuery.isEmpty) return members;
+    return members.where((m) {
+      return m.name.toLowerCase().contains(_searchQuery) ||
+          m.profession.toLowerCase().contains(_searchQuery) ||
+          m.phone.replaceAll(' ', '').contains(_searchQuery.replaceAll(' ', ''));
+    }).toList();
   }
 
   @override
@@ -206,7 +104,6 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // شريط البحث الموسع
             if (_isSearching)
               Container(
                 color: appBarColor,
@@ -224,81 +121,103 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
 
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                children: [
-                  // البانر - يختفي عند البحث
-                  if (!_isSearching) ...[
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(colors: [Color(0xFF2563EB), Color(0xFF8B5CF6)]),
-                        borderRadius: BorderRadius.circular(24),
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance.collection('family_members').snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        'حدث خطأ في تحميل البيانات',
+                        style: TextStyle(color: textColor),
                       ),
-                      child: Row(
-                        children: [
-                          Expanded(
+                    );
+                  }
+
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final allMembers = snapshot.data!.docs
+                      .map((doc) => FamilyMember.fromMap(doc.data() as Map<String, dynamic>))
+                      .toList();
+
+                  final filteredMembers = _filterMembers(allMembers);
+
+                  return ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                    children: [
+                      if (!_isSearching) ...[
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(colors: [Color(0xFF2563EB), Color(0xFF8B5CF6)]),
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'مرحبًا، هذا هو دليل العائلة 👨‍👩‍👧‍👦',
+                                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '${allMembers.length} فرد من العائلة',
+                                      style: const TextStyle(color: Colors.white70, fontSize: 13),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: const Icon(Icons.people_alt_rounded, color: Colors.white, size: 32),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'أفراد العائلة',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+
+                      if (_isSearching && filteredMembers.isEmpty)
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 60),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'مرحبًا، هذا هو دليل العائلة 👨‍👩‍👧‍👦',
-                                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${familyMembers.length} فرد من العائلة',
-                                  style: const TextStyle(color: Colors.white70, fontSize: 13),
-                                ),
+                                Icon(Icons.search_off_rounded, size: 64, color: isDark ? Colors.white24 : Colors.grey.shade300),
+                                const SizedBox(height: 12),
+                                Text('لا توجد نتائج', style: TextStyle(color: isDark ? Colors.white38 : Colors.grey, fontSize: 16)),
                               ],
                             ),
                           ),
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: const Icon(Icons.people_alt_rounded, color: Colors.white, size: 32),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'أفراد العائلة',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-
-                  // نتائج البحث
-                  if (_isSearching && _filteredMembers.isEmpty)
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 60),
-                        child: Column(
-                          children: [
-                            Icon(Icons.search_off_rounded, size: 64, color: isDark ? Colors.white24 : Colors.grey.shade300),
-                            const SizedBox(height: 12),
-                            Text('لا توجد نتائج', style: TextStyle(color: isDark ? Colors.white38 : Colors.grey, fontSize: 16)),
-                          ],
                         ),
-                      ),
-                    ),
 
-                  ..._filteredMembers.map((member) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _MemberCard(
-                      member: member,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => MemberDetailScreen(member: member)),
-                      ),
-                      onWhatsApp: () => _openWhatsApp(member.phone),
-                    ),
-                  )),
-                ],
+                      ...filteredMembers.map((member) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _MemberCard(
+                          member: member,
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => MemberDetailScreen(member: member)),
+                          ),
+                          onWhatsApp: () => _openWhatsApp(member.phone),
+                        ),
+                      )),
+                    ],
+                  );
+                },
               ),
             ),
           ],
@@ -373,7 +292,6 @@ class _MemberCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            // زر واتساب
             GestureDetector(
               onTap: onWhatsApp,
               child: Container(
