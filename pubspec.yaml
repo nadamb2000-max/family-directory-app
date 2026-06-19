@@ -12,7 +12,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   cupertino_icons: ^1.0.0
-  google_fonts: ^6.0.0
+  google_fonts: ^8.1.0
   url_launcher: ^6.2.0
 
 dev_dependencies:
