@@ -5,7 +5,6 @@ export 'edit_profile_screen.dart';
 export 'home_screen.dart';
 export 'login_screen.dart';
 export 'main_shell.dart';
-export 'profile_screen.dart';
 export 'splash_screen.dart';
 export 'status_screen.dart';
 export 'member_detail_screen.dart';
