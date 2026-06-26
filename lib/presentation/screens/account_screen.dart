@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'admin_screen.dart';
 import 'edit_profile_screen.dart';
 
@@ -16,102 +17,189 @@ class AccountScreen extends StatelessWidget {
     final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
     final subTextColor = isDark ? Colors.white60 : const Color(0xFF64748B);
 
-    final currentUser = FirebaseAuth.instance.currentUser;
-    final userEmail = currentUser?.email ?? 'غير مسجّل';
-    final displayName = currentUser?.displayName?.isNotEmpty == true
-        ? currentUser!.displayName!
-        : userEmail.split('@').first;
+    final uid = FirebaseAuth.instance.currentUser?.uid;
 
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
         backgroundColor: appBarColor,
         elevation: 0,
-        title: Text('حسابي', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+        title: Text('حسابي',
+            style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // بطاقة المستخدم
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [Color(0xFF2563EB), Color(0xFF8B5CF6)]),
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Row(
-              children: [
-                const CircleAvatar(
-                  radius: 36,
-                  backgroundColor: Colors.white24,
-                  child: Icon(Icons.person, size: 36, color: Colors.white),
+      body: uid == null
+          ? const Center(child: Text('غير مسجّل'))
+          : StreamBuilder<DocumentSnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .snapshots(),
+        builder: (context, snapshot) {
+          // بيانات افتراضية ريثما تحمّل
+          String name = '';
+          String email = FirebaseAuth.instance.currentUser?.email ?? '';
+          String profession = '';
+          String location = '';
+          String phone = '';
+
+          if (snapshot.hasData && snapshot.data!.exists) {
+            final data = snapshot.data!.data() as Map<String, dynamic>;
+            name = data['name'] ?? '';
+            email = data['email'] ?? email;
+            profession = data['profession'] ?? '';
+            location = data['location'] ?? '';
+            phone = data['phone'] ?? '';
+          }
+
+          final displayName = name.isNotEmpty
+              ? name
+              : email.split('@').first;
+
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              // بطاقة المستخدم
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                      colors: [Color(0xFF2563EB), Color(0xFF8B5CF6)]),
+                  borderRadius: BorderRadius.circular(24),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        displayName,
-                        style: theme.textTheme.titleMedium?.copyWith(color: Colors.white),
-                        overflow: TextOverflow.ellipsis,
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 36,
+                      backgroundColor: Colors.white24,
+                      child: Text(
+                        displayName.isNotEmpty ? displayName[0] : '?',
+                        style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        userEmail,
-                        style: const TextStyle(color: Colors.white70, fontSize: 13),
-                        overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            displayName,
+                            style: theme.textTheme.titleMedium
+                                ?.copyWith(color: Colors.white),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            email,
+                            style: const TextStyle(
+                                color: Colors.white70, fontSize: 13),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          if (profession.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                const Icon(Icons.work_outline,
+                                    size: 13, color: Colors.white60),
+                                const SizedBox(width: 4),
+                                Text(profession,
+                                    style: const TextStyle(
+                                        color: Colors.white60,
+                                        fontSize: 12)),
+                              ],
+                            ),
+                          ],
+                          if (location.isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Row(
+                              children: [
+                                const Icon(Icons.location_on_outlined,
+                                    size: 13, color: Colors.white60),
+                                const SizedBox(width: 4),
+                                Text(location,
+                                    style: const TextStyle(
+                                        color: Colors.white60,
+                                        fontSize: 12)),
+                              ],
+                            ),
+                          ],
+                          if (phone.isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Row(
+                              children: [
+                                const Icon(Icons.phone_outlined,
+                                    size: 13, color: Colors.white60),
+                                const SizedBox(width: 4),
+                                Text(phone,
+                                    style: const TextStyle(
+                                        color: Colors.white60,
+                                        fontSize: 12)),
+                              ],
+                            ),
+                          ],
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-          _SectionTitle(title: 'الإعدادات', textColor: textColor),
-          const SizedBox(height: 10),
-          _SettingsTile(
-            icon: Icons.edit_outlined,
-            label: 'تعديل الملف الشخصي',
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EditProfileScreen())),
-            cardColor: cardColor,
-            textColor: textColor,
-            isDark: isDark,
-          ),
-          _SettingsTile(
-            icon: Icons.admin_panel_settings_outlined,
-            label: 'لوحة الإدارة',
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminScreen())),
-            cardColor: cardColor,
-            textColor: textColor,
-            isDark: isDark,
-          ),
-          _SettingsTile(
-            icon: Icons.info_outline,
-            label: 'عن التطبيق',
-            onTap: () => showAboutDialog(
-              context: context,
-              applicationName: 'روافدكم',
-              applicationVersion: '1.0.0',
-              applicationLegalese: 'تطبيق عائلي بسيط يركّز على التواصل والملف الشخصي.',
-            ),
-            cardColor: cardColor,
-            textColor: textColor,
-            isDark: isDark,
-          ),
-          const SizedBox(height: 10),
-          _SettingsTile(
-            icon: Icons.logout_rounded,
-            label: 'تسجيل الخروج',
-            onTap: () => FirebaseAuth.instance.signOut(),
-            cardColor: cardColor,
-            textColor: Colors.red,
-            isDark: isDark,
-            iconColor: Colors.red,
-          ),
-        ],
+              ),
+
+              const SizedBox(height: 24),
+              _SectionTitle(title: 'الإعدادات', textColor: textColor),
+              const SizedBox(height: 10),
+
+              _SettingsTile(
+                icon: Icons.edit_outlined,
+                label: 'تعديل الملف الشخصي',
+                onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const EditProfileScreen())),
+                cardColor: cardColor,
+                textColor: textColor,
+                isDark: isDark,
+              ),
+              _SettingsTile(
+                icon: Icons.admin_panel_settings_outlined,
+                label: 'لوحة الإدارة',
+                onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const AdminScreen())),
+                cardColor: cardColor,
+                textColor: textColor,
+                isDark: isDark,
+              ),
+              _SettingsTile(
+                icon: Icons.info_outline,
+                label: 'عن التطبيق',
+                onTap: () => showAboutDialog(
+                  context: context,
+                  applicationName: 'روافدكم',
+                  applicationVersion: '1.0.0',
+                  applicationLegalese:
+                  'تطبيق عائلي بسيط يركّز على التواصل والملف الشخصي.',
+                ),
+                cardColor: cardColor,
+                textColor: textColor,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 10),
+              _SettingsTile(
+                icon: Icons.logout_rounded,
+                label: 'تسجيل الخروج',
+                onTap: () => FirebaseAuth.instance.signOut(),
+                cardColor: cardColor,
+                textColor: Colors.red,
+                isDark: isDark,
+                iconColor: Colors.red,
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -124,7 +212,9 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor));
+    return Text(title,
+        style: TextStyle(
+            fontSize: 16, fontWeight: FontWeight.bold, color: textColor));
   }
 }
 
@@ -169,8 +259,12 @@ class _SettingsTile extends StatelessWidget {
           children: [
             Icon(icon, color: iconColor ?? const Color(0xFF2563EB), size: 22),
             const SizedBox(width: 14),
-            Expanded(child: Text(label, style: TextStyle(fontSize: 14.5, color: textColor))),
-            Icon(Icons.arrow_forward_ios_rounded, size: 14, color: isDark ? Colors.white38 : Colors.grey),
+            Expanded(
+                child: Text(label,
+                    style: TextStyle(fontSize: 14.5, color: textColor))),
+            Icon(Icons.arrow_forward_ios_rounded,
+                size: 14,
+                color: isDark ? Colors.white38 : Colors.grey),
           ],
         ),
       ),
