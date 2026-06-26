@@ -1,4 +1,4 @@
-name: Send Repo Copy to Telegram
+name: Build Flutter APK and Send to Telegram
 
 on:
   push:
@@ -7,31 +7,42 @@ on:
       # أضف أي فروع تانية بدك تتابعها، مثلاً: master, dev
 
 jobs:
-  send-to-telegram:
+  build-and-send:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Create zip archive
-        run: |
-          REPO_NAME=$(basename "$GITHUB_REPOSITORY")
-          SHORT_SHA=$(echo "$GITHUB_SHA" | cut -c1-7)
-          ZIP_NAME="${REPO_NAME}-${SHORT_SHA}.zip"
-          zip -r "$ZIP_NAME" . -x ".git/*"
-          echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
 
-      - name: Send zip file to Telegram
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          # إذا عندك نسخة فلاتر محددة بدك تستخدمها، أضف: flutter-version: '3.x.x'
+
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      - name: Build APK (release)
+        run: flutter build apk --release
+
+      - name: Send APK to Telegram
         env:
           BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          CAPTION="📦 ${GITHUB_REPOSITORY}
+          APK_PATH="build/app/outputs/flutter-apk/app-release.apk"
+          CAPTION="📱 ${GITHUB_REPOSITORY}
           🔀 Branch: ${GITHUB_REF_NAME}
           👤 By: ${GITHUB_ACTOR}
           📝 Commit: ${GITHUB_SHA:0:7}"
 
           curl -s -F chat_id="${CHAT_ID}" \
-               -F document=@"${ZIP_NAME}" \
+               -F document=@"${APK_PATH}" \
                -F caption="${CAPTION}" \
                "https://api.telegram.org/bot${BOT_TOKEN}/sendDocument"
