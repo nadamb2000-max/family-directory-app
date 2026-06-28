@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'admin_screen.dart';
 import 'edit_profile_screen.dart';
+import 'login_screen.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
@@ -36,15 +37,16 @@ class AccountScreen extends StatelessWidget {
             .doc(uid)
             .snapshots(),
         builder: (context, snapshot) {
-          // بيانات افتراضية ريثما تحمّل
           String name = '';
-          String email = FirebaseAuth.instance.currentUser?.email ?? '';
+          String email =
+              FirebaseAuth.instance.currentUser?.email ?? '';
           String profession = '';
           String location = '';
           String phone = '';
 
           if (snapshot.hasData && snapshot.data!.exists) {
-            final data = snapshot.data!.data() as Map<String, dynamic>;
+            final data =
+            snapshot.data!.data() as Map<String, dynamic>;
             name = data['name'] ?? '';
             email = data['email'] ?? email;
             profession = data['profession'] ?? '';
@@ -52,9 +54,8 @@ class AccountScreen extends StatelessWidget {
             phone = data['phone'] ?? '';
           }
 
-          final displayName = name.isNotEmpty
-              ? name
-              : email.split('@').first;
+          final displayName =
+          name.isNotEmpty ? name : email.split('@').first;
 
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -100,45 +101,39 @@ class AccountScreen extends StatelessWidget {
                           ),
                           if (profession.isNotEmpty) ...[
                             const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                const Icon(Icons.work_outline,
-                                    size: 13, color: Colors.white60),
-                                const SizedBox(width: 4),
-                                Text(profession,
-                                    style: const TextStyle(
-                                        color: Colors.white60,
-                                        fontSize: 12)),
-                              ],
-                            ),
+                            Row(children: [
+                              const Icon(Icons.work_outline,
+                                  size: 13, color: Colors.white60),
+                              const SizedBox(width: 4),
+                              Text(profession,
+                                  style: const TextStyle(
+                                      color: Colors.white60,
+                                      fontSize: 12)),
+                            ]),
                           ],
                           if (location.isNotEmpty) ...[
                             const SizedBox(height: 2),
-                            Row(
-                              children: [
-                                const Icon(Icons.location_on_outlined,
-                                    size: 13, color: Colors.white60),
-                                const SizedBox(width: 4),
-                                Text(location,
-                                    style: const TextStyle(
-                                        color: Colors.white60,
-                                        fontSize: 12)),
-                              ],
-                            ),
+                            Row(children: [
+                              const Icon(Icons.location_on_outlined,
+                                  size: 13, color: Colors.white60),
+                              const SizedBox(width: 4),
+                              Text(location,
+                                  style: const TextStyle(
+                                      color: Colors.white60,
+                                      fontSize: 12)),
+                            ]),
                           ],
                           if (phone.isNotEmpty) ...[
                             const SizedBox(height: 2),
-                            Row(
-                              children: [
-                                const Icon(Icons.phone_outlined,
-                                    size: 13, color: Colors.white60),
-                                const SizedBox(width: 4),
-                                Text(phone,
-                                    style: const TextStyle(
-                                        color: Colors.white60,
-                                        fontSize: 12)),
-                              ],
-                            ),
+                            Row(children: [
+                              const Icon(Icons.phone_outlined,
+                                  size: 13, color: Colors.white60),
+                              const SizedBox(width: 4),
+                              Text(phone,
+                                  style: const TextStyle(
+                                      color: Colors.white60,
+                                      fontSize: 12)),
+                            ]),
                           ],
                         ],
                       ),
@@ -191,7 +186,17 @@ class AccountScreen extends StatelessWidget {
               _SettingsTile(
                 icon: Icons.logout_rounded,
                 label: 'تسجيل الخروج',
-                onTap: () => FirebaseAuth.instance.signOut(),
+                onTap: () async {
+                  await FirebaseAuth.instance.signOut();
+                  if (context.mounted) {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const LoginScreen()),
+                          (_) => false,
+                    );
+                  }
+                },
                 cardColor: cardColor,
                 textColor: Colors.red,
                 isDark: isDark,

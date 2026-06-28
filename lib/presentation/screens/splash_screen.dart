@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'login_screen.dart';
+import 'main_shell.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -14,24 +16,20 @@ class _SplashScreenState extends State<SplashScreen>
   Timer? _navigationTimer;
   bool _isLeaving = false;
 
-  // دخول الأيقونة: تكبير ناعم + ظهور تدريجي (بدون نطّ كرتوني)
   late final AnimationController _entryController;
   late final Animation<double> _iconScale;
   late final Animation<double> _iconFade;
 
-  // توهج "تنفّس" هادئ حول الأيقونة (بدل النبض القوي)
   late final AnimationController _breatheController;
   late final Animation<double> _glowScale;
   late final Animation<double> _glowOpacity;
 
-  // ظهور النصوص بالتتابع
   late final AnimationController _textController;
   late final Animation<double> _titleFade;
   late final Animation<Offset> _titleSlide;
   late final Animation<double> _subtitleFade;
   late final Animation<Offset> _subtitleSlide;
 
-  // حركة خفيفة جداً للأشكال الزخرفية بالخلفية (عمق بصري)
   late final AnimationController _bgController;
 
   @override
@@ -52,7 +50,6 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    // توهج هادئ يتمدد ويخفت ببطء — إحساس "نفَس" لا "نبضة"
     _breatheController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2200),
@@ -111,14 +108,11 @@ class _SplashScreenState extends State<SplashScreen>
 
     _navigationTimer = Timer(const Duration(milliseconds: 2500), () {
       if (!mounted) return;
-      _goToLogin();
+      _navigate();
     });
   }
 
-  // إيقاف كل الأنيميشن المتكررة قبل الانتقال — هاد هو سبب التعليق:
-  // الأنيميشن المستمر كان يضل يعمل rebuild أثناء بناء الشاشة الجديدة
-  // بالتوازي، فيخلق ضغط على الـ frame وتعليق لحظي.
-  void _goToLogin() {
+  void _navigate() {
     if (_isLeaving) return;
     _isLeaving = true;
 
@@ -127,11 +121,15 @@ class _SplashScreenState extends State<SplashScreen>
     _entryController.stop();
     _textController.stop();
 
+    // فحص حالة تسجيل الدخول
+    final isLoggedIn = FirebaseAuth.instance.currentUser != null;
+
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 650),
-        pageBuilder: (_, animation, __) => const LoginScreen(),
+        pageBuilder: (_, animation, __) =>
+        isLoggedIn ? const MainShell() : const LoginScreen(),
         transitionsBuilder: (_, animation, __, child) {
           final fade = CurvedAnimation(
             parent: animation,
@@ -175,7 +173,6 @@ class _SplashScreenState extends State<SplashScreen>
     return Scaffold(
       body: Stack(
         children: [
-          // الخلفية: تدرّج ثابت
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -185,8 +182,6 @@ class _SplashScreenState extends State<SplashScreen>
               ),
             ),
           ),
-
-          // أشكال زخرفية متحركة بهدوء لإضافة عمق بصري
           AnimatedBuilder(
             animation: _bgController,
             builder: (context, child) {
@@ -207,8 +202,6 @@ class _SplashScreenState extends State<SplashScreen>
               );
             },
           ),
-
-          // المحتوى الأساسي
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -219,7 +212,6 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      // توهج هادئ "متنفّس" خلف الأيقونة
                       AnimatedBuilder(
                         animation: _breatheController,
                         builder: (context, child) {
@@ -244,7 +236,6 @@ class _SplashScreenState extends State<SplashScreen>
                           );
                         },
                       ),
-                      // الأيقونة: دخول ناعم بتكبير وظهور تدريجي
                       ScaleTransition(
                         scale: _iconScale,
                         child: FadeTransition(
@@ -272,12 +263,11 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                 ),
                 const SizedBox(height: 26),
-
                 FadeTransition(
                   opacity: _titleFade,
                   child: SlideTransition(
                     position: _titleSlide,
-                    child: Text(
+                    child: const Text(
                       'روافدكم',
                       style: TextStyle(
                         fontSize: 34,
@@ -289,7 +279,6 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                 ),
                 const SizedBox(height: 8),
-
                 FadeTransition(
                   opacity: _subtitleFade,
                   child: SlideTransition(
