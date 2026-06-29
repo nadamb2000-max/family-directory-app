@@ -42,4 +42,4 @@ flutter:
         - asset: assets/fonts/Tajawal-Bold.ttf
           weight: 700
         - asset: assets/fonts/Tajawal-ExtraBold.ttf
-          weight: 800flutter pub get
+          weight: 800
