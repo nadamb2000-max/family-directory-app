@@ -43,6 +43,7 @@ class AccountScreen extends StatelessWidget {
           String profession = '';
           String location = '';
           String phone = '';
+          String? profileImage; // << جديد
 
           if (snapshot.hasData && snapshot.data!.exists) {
             final data =
@@ -52,10 +53,13 @@ class AccountScreen extends StatelessWidget {
             profession = data['profession'] ?? '';
             location = data['location'] ?? '';
             phone = data['phone'] ?? '';
+            profileImage = data['profileImage']; // << جديد
           }
 
           final displayName =
           name.isNotEmpty ? name : email.split('@').first;
+          final hasProfileImage =
+              profileImage != null && profileImage.isNotEmpty;
 
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -73,7 +77,12 @@ class AccountScreen extends StatelessWidget {
                     CircleAvatar(
                       radius: 36,
                       backgroundColor: Colors.white24,
-                      child: Text(
+                      backgroundImage: hasProfileImage
+                          ? NetworkImage(profileImage!)
+                          : null,
+                      child: hasProfileImage
+                          ? null
+                          : Text(
                         displayName.isNotEmpty ? displayName[0] : '?',
                         style: const TextStyle(
                             fontSize: 28,

@@ -310,6 +310,7 @@ class _HomeScreenState extends State<HomeScreen> {
       email: data['email'] ?? '',
       workImages: List<String>.from(data['workImages'] ?? []),
       avatarColor: const Color(0xFF2563EB),
+      profileImage: data['profileImage'],
     );
   }
 }
@@ -340,6 +341,7 @@ class _MemberCard extends StatelessWidget {
     final profession = data['profession'] ?? '';
     final location = data['location'] ?? '';
     final phone = data['phone'] ?? '';
+    final String? profileImage = data['profileImage']; // << جديد
     final initial = name.isNotEmpty ? name[0] : '?';
 
     return GestureDetector(
@@ -379,13 +381,19 @@ class _MemberCard extends StatelessWidget {
                 CircleAvatar(
                   radius: 30,
                   backgroundColor: accentColor.withOpacity(isDark ? 0.3 : 0.12),
-                  child: Text(
+                  backgroundImage: (profileImage != null &&
+                      profileImage.isNotEmpty)
+                      ? NetworkImage(profileImage)
+                      : null,
+                  child: (profileImage == null || profileImage.isEmpty)
+                      ? Text(
                     initial,
                     style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: accentColor),
-                  ),
+                  )
+                      : null,
                 ),
                 if (isMe)
                   Positioned(
