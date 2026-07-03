@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/services/cloudinary_service.dart';
+import '../../core/services/onesignal_service.dart';
 
 class CreateStatusScreen extends StatefulWidget {
   const CreateStatusScreen({super.key});
@@ -78,6 +79,12 @@ class _CreateStatusScreenState extends State<CreateStatusScreen> {
         'createdAt': Timestamp.fromDate(now),
         'expiresAt': Timestamp.fromDate(now.add(duration)),
       });
+
+      // إرسال إشعار لكل أفراد العائلة
+      OneSignalService.sendStatusNotification(
+        userName: userName,
+        statusText: text,
+      );
 
       if (mounted) Navigator.pop(context);
     } catch (e) {

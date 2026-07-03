@@ -1,39 +1,33 @@
 name: Build Flutter APK and Send to Telegram
-
 on:
   push:
     branches:
       - main
   workflow_dispatch:
-
 jobs:
   build-and-send:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.44.2'
           channel: 'stable'
-
       - name: Install dependencies
         run: flutter pub get
-
       - name: Analyze code
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
-
       - name: Build APK (release, split per ABI)
-        run: flutter build apk --release --split-per-abi
-
+        env:
+          ONESIGNAL_REST_API_KEY: ${{ secrets.ONESIGNAL_REST_API_KEY }}
+        run: flutter build apk --release --split-per-abi --dart-define=ONESIGNAL_REST_API_KEY=$ONESIGNAL_REST_API_KEY
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release-apk
           path: build/app/outputs/flutter-apk/*.apk
-
       - name: Send APK to Telegram
         env:
           BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -46,7 +40,6 @@ jobs:
           👤 By: ${GITHUB_ACTOR}
           📝 Commit: ${GITHUB_SHA:0:7}
           📦 ABI: arm64-v8a"
-
           curl -s -F chat_id="${CHAT_ID}" \
                -F document=@"${APK_PATH}" \
                -F caption="${CAPTION}" \

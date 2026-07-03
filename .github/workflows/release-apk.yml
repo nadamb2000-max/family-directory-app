@@ -26,7 +26,9 @@ jobs:
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release
+        env:
+          ONESIGNAL_REST_API_KEY: ${{ secrets.ONESIGNAL_REST_API_KEY }}
+        run: flutter build apk --release --dart-define=ONESIGNAL_REST_API_KEY=$ONESIGNAL_REST_API_KEY
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
