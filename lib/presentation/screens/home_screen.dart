@@ -57,9 +57,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF4F6FB);
+    final bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF0F4FF);
     final appBarColor = isDark ? const Color(0xFF1E293B) : Colors.white;
     final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
+    final subTextColor = isDark ? Colors.white60 : const Color(0xFF64748B);
     final currentUid = FirebaseAuth.instance.currentUser?.uid;
 
     return Scaffold(
@@ -67,6 +68,8 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: appBarColor,
         elevation: 0,
+        shadowColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
         title: _isSearching
             ? TextField(
           controller: _searchController,
@@ -83,7 +86,9 @@ class _HomeScreenState extends State<HomeScreen> {
         )
             : Text('الرئيسية',
             style: TextStyle(
-                color: textColor, fontWeight: FontWeight.bold)),
+                color: textColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 18)),
         centerTitle: !_isSearching,
         actions: [
           AnimatedSwitcher(
@@ -99,10 +104,15 @@ class _HomeScreenState extends State<HomeScreen> {
             )
                 : IconButton(
               key: const ValueKey('search'),
-              icon: Icon(Icons.search_rounded,
-                  color: isDark
-                      ? Colors.white70
-                      : const Color(0xFF2563EB)),
+              icon: Container(
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2563EB).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.search_rounded,
+                    color: Color(0xFF2563EB), size: 20),
+              ),
               onPressed: _toggleSearch,
             ),
           ),
@@ -143,36 +153,52 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   }
                   if (!snapshot.hasData) {
-                    return const Center(child: CircularProgressIndicator());
+                    return Center(
+                      child: CircularProgressIndicator(
+                        color: const Color(0xFF2563EB),
+                        backgroundColor:
+                        const Color(0xFF2563EB).withOpacity(0.1),
+                      ),
+                    );
                   }
 
                   final allDocs = snapshot.data!.docs;
-
-                  // افصل المستخدم الحالي عن البقية
-                  final myDoc = allDocs.where((d) => d.id == currentUid).firstOrNull;
-                  final otherDocs = allDocs.where((d) => d.id != currentUid).toList();
-
-                  // طبّق البحث
-                  final filteredOthers = otherDocs.where((d) =>
-                      _matchesSearch(d.data() as Map<String, dynamic>)).toList();
-
+                  final myDoc = allDocs
+                      .where((d) => d.id == currentUid)
+                      .firstOrNull;
+                  final otherDocs =
+                  allDocs.where((d) => d.id != currentUid).toList();
+                  final filteredOthers = otherDocs
+                      .where((d) =>
+                      _matchesSearch(d.data() as Map<String, dynamic>))
+                      .toList();
                   final myData = myDoc?.data() as Map<String, dynamic>?;
-                  final myMatchesSearch = myData != null && _matchesSearch(myData);
-                  final showMe = myData != null && (_searchQuery.isEmpty || myMatchesSearch);
-
+                  final myMatchesSearch =
+                      myData != null && _matchesSearch(myData);
+                  final showMe = myData != null &&
+                      (_searchQuery.isEmpty || myMatchesSearch);
                   final totalCount = allDocs.length;
 
                   return ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
                     children: [
-                      // البانر العلوي
                       if (!_isSearching) ...[
                         Container(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                                colors: [Color(0xFF2563EB), Color(0xFF8B5CF6)]),
-                            borderRadius: BorderRadius.circular(24),
+                              colors: [Color(0xFF2563EB), Color(0xFF8B5CF6)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(32),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF2563EB).withOpacity(0.35),
+                                blurRadius: 20,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
                           ),
                           child: Row(
                             children: [
@@ -181,26 +207,36 @@ class _HomeScreenState extends State<HomeScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const Text(
-                                      'مرحبًا، هذا هو دليل العائلة 👨‍👩‍👧‍👦',
+                                      'مرحبًا بك في روافدكم 👨‍👩‍👧‍👦',
                                       style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold),
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      '$totalCount فرد من العائلة',
-                                      style: const TextStyle(
-                                          color: Colors.white70, fontSize: 13),
+                                    const SizedBox(height: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        '$totalCount فرد من العائلة',
+                                        style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600),
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
                               Container(
-                                padding: const EdgeInsets.all(12),
+                                padding: const EdgeInsets.all(14),
                                 decoration: BoxDecoration(
                                   color: Colors.white.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(16),
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: const Icon(Icons.people_alt_rounded,
                                     color: Colors.white, size: 32),
@@ -208,16 +244,32 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 24),
-                        Text('أفراد العائلة',
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: textColor)),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 28),
+                        Row(
+                          children: [
+                            Container(
+                              width: 4,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xFF2563EB), Color(0xFF8B5CF6)],
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                ),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Text('أفراد العائلة',
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: textColor)),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
                       ],
 
-                      // بطاقة "أنت" أولاً
                       if (showMe)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 12),
@@ -239,33 +291,40 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
 
-                      // لا نتائج
-                      if (_isSearching &&
-                          filteredOthers.isEmpty &&
-                          !showMe)
+                      if (_isSearching && filteredOthers.isEmpty && !showMe)
                         Center(
                           child: Padding(
                             padding: const EdgeInsets.only(top: 60),
                             child: Column(
                               children: [
-                                Icon(Icons.search_off_rounded,
-                                    size: 64,
+                                Container(
+                                  padding: const EdgeInsets.all(24),
+                                  decoration: BoxDecoration(
                                     color: isDark
-                                        ? Colors.white24
-                                        : Colors.grey.shade300),
-                                const SizedBox(height: 12),
+                                        ? const Color(0xFF1E293B)
+                                        : Colors.white,
+                                    borderRadius: BorderRadius.circular(32),
+                                  ),
+                                  child: Icon(Icons.search_off_rounded,
+                                      size: 56,
+                                      color: isDark
+                                          ? Colors.white24
+                                          : const Color(0xFF2563EB)
+                                          .withOpacity(0.3)),
+                                ),
+                                const SizedBox(height: 16),
                                 Text('لا توجد نتائج',
                                     style: TextStyle(
                                         color: isDark
                                             ? Colors.white38
-                                            : Colors.grey,
-                                        fontSize: 16)),
+                                            : subTextColor,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600)),
                               ],
                             ),
                           ),
                         ),
 
-                      // بقية الأفراد
                       ...filteredOthers.map((doc) {
                         final data = doc.data() as Map<String, dynamic>;
                         return Padding(
@@ -299,7 +358,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // تحويل بيانات Firestore إلى FamilyMember لشاشة التفاصيل
   FamilyMember _toFamilyMember(Map<String, dynamic> data) {
     return FamilyMember(
       name: data['name'] ?? '',
@@ -341,13 +399,13 @@ class _MemberCard extends StatelessWidget {
     final profession = data['profession'] ?? '';
     final location = data['location'] ?? '';
     final phone = data['phone'] ?? '';
-    final String? profileImage = data['profileImage']; // << جديد
+    final String? profileImage = data['profileImage'];
     final initial = name.isNotEmpty ? name[0] : '?';
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isMe ? null : cardColor,
           gradient: isMe
@@ -359,18 +417,19 @@ class _MemberCard extends StatelessWidget {
             end: Alignment.bottomRight,
           )
               : null,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(28),
           border: isMe
-              ? Border.all(
-              color: accentColor.withOpacity(0.4), width: 1.5)
+              ? Border.all(color: accentColor.withOpacity(0.3), width: 1.5)
               : null,
           boxShadow: [
             BoxShadow(
               color: isMe
-                  ? accentColor.withOpacity(0.12)
-                  : (isDark ? Colors.black26 : const Color(0x0F000000)),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+                  ? accentColor.withOpacity(0.15)
+                  : (isDark
+                  ? Colors.black26
+                  : const Color(0xFF2563EB).withOpacity(0.06)),
+              blurRadius: isMe ? 20 : 16,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
@@ -378,22 +437,34 @@ class _MemberCard extends StatelessWidget {
           children: [
             Stack(
               children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundColor: accentColor.withOpacity(isDark ? 0.3 : 0.12),
-                  backgroundImage: (profileImage != null &&
-                      profileImage.isNotEmpty)
-                      ? NetworkImage(profileImage)
-                      : null,
-                  child: (profileImage == null || profileImage.isEmpty)
-                      ? Text(
-                    initial,
-                    style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: accentColor),
+                Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: isMe
+                      ? BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF2563EB), Color(0xFF8B5CF6)],
+                    ),
+                    borderRadius: BorderRadius.circular(34),
                   )
                       : null,
+                  child: CircleAvatar(
+                    radius: 28,
+                    backgroundColor:
+                    accentColor.withOpacity(isDark ? 0.3 : 0.1),
+                    backgroundImage:
+                    (profileImage != null && profileImage.isNotEmpty)
+                        ? NetworkImage(profileImage)
+                        : null,
+                    child: (profileImage == null || profileImage.isEmpty)
+                        ? Text(
+                      initial,
+                      style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: accentColor),
+                    )
+                        : null,
+                  ),
                 ),
                 if (isMe)
                   Positioned(
@@ -403,8 +474,17 @@ class _MemberCard extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 5, vertical: 2),
                       decoration: BoxDecoration(
-                        color: accentColor,
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF2563EB), Color(0xFF8B5CF6)],
+                        ),
                         borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: accentColor.withOpacity(0.4),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: const Text('أنت',
                           style: TextStyle(
@@ -425,30 +505,39 @@ class _MemberCard extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
                           color: textColor)),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 4),
                   if (profession.isNotEmpty)
-                    Row(
-                      children: [
-                        const Icon(Icons.work_outline_rounded,
-                            size: 13, color: accentColor),
-                        const SizedBox(width: 4),
-                        Text(profession,
-                            style: const TextStyle(
-                                color: accentColor,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600)),
-                      ],
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: accentColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.work_outline_rounded,
+                              size: 11, color: accentColor),
+                          const SizedBox(width: 4),
+                          Text(profession,
+                              style: const TextStyle(
+                                  color: accentColor,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600)),
+                        ],
+                      ),
                     ),
                   const SizedBox(height: 4),
                   if (location.isNotEmpty)
                     Row(
                       children: [
                         Icon(Icons.location_on_outlined,
-                            size: 13, color: subTextColor),
-                        const SizedBox(width: 4),
+                            size: 12, color: subTextColor),
+                        const SizedBox(width: 3),
                         Text(location,
                             style:
-                            TextStyle(color: subTextColor, fontSize: 12)),
+                            TextStyle(color: subTextColor, fontSize: 11)),
                       ],
                     ),
                 ],
@@ -459,19 +548,26 @@ class _MemberCard extends StatelessWidget {
               GestureDetector(
                 onTap: onWhatsApp,
                 child: Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(9),
                   decoration: BoxDecoration(
                     color: const Color(0xFF25D366)
                         .withOpacity(isDark ? 0.2 : 0.1),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: const Icon(Icons.chat_rounded,
-                      color: Color(0xFF25D366), size: 22),
+                      color: Color(0xFF25D366), size: 20),
                 ),
               ),
             const SizedBox(width: 8),
-            Icon(Icons.arrow_forward_ios_rounded,
-                size: 14, color: subTextColor),
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: accentColor.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(Icons.arrow_forward_ios_rounded,
+                  size: 12, color: accentColor.withOpacity(0.6)),
+            ),
           ],
         ),
       ),
