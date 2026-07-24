@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'login_screen.dart';
 import 'main_shell.dart';
+import 'onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -112,7 +114,7 @@ class _SplashScreenState extends State<SplashScreen>
     });
   }
 
-  void _navigate() {
+  Future<void> _navigate() async {
     if (_isLeaving) return;
     _isLeaving = true;
 
@@ -120,6 +122,20 @@ class _SplashScreenState extends State<SplashScreen>
     _bgController.stop();
     _entryController.stop();
     _textController.stop();
+
+    // فحص هل المستخدم شاهد شاشات الترحيب من قبل
+    final prefs = await SharedPreferences.getInstance();
+    final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
+
+    if (!mounted) return;
+
+    if (!onboardingCompleted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+      );
+      return;
+    }
 
     // فحص حالة تسجيل الدخول
     final isLoggedIn = FirebaseAuth.instance.currentUser != null;
