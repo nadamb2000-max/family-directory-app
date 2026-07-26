@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'member_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -449,20 +450,15 @@ class _MemberCard extends StatelessWidget {
                       : null,
                   child: CircleAvatar(
                     radius: 28,
-                    backgroundColor:
-                    accentColor.withOpacity(isDark ? 0.3 : 0.1),
-                    backgroundImage:
-                    (profileImage != null && profileImage.isNotEmpty)
-                        ? NetworkImage(profileImage)
+                    backgroundColor: accentColor.withOpacity(isDark ? 0.3 : 0.1),
+                    backgroundImage: (profileImage != null && profileImage.isNotEmpty)
+                        ? CachedNetworkImageProvider(profileImage)
                         : null,
                     child: (profileImage == null || profileImage.isEmpty)
                         ? Text(
-                      initial,
-                      style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: accentColor),
-                    )
+                            initial,
+                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: accentColor),
+                          )
                         : null,
                   ),
                 ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class FamilyMember {
   final String name;
@@ -108,7 +109,7 @@ class MemberDetailScreen extends StatelessWidget {
                       radius: 55,
                       backgroundColor: Colors.white.withOpacity(0.25),
                       backgroundImage: hasProfileImage
-                          ? NetworkImage(member.profileImage!)
+                          ? CachedNetworkImageProvider(member.profileImage!)
                           : null,
                       child: hasProfileImage
                           ? null
@@ -314,36 +315,25 @@ class MemberDetailScreen extends StatelessWidget {
                                   tag: 'work_image_$index',
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(12),
-                                    child: Image.network(
-                                      imageUrl,
+                                    child: CachedNetworkImage(
+                                      imageUrl: imageUrl,
                                       fit: BoxFit.cover,
-                                      loadingBuilder:
-                                          (context, child, progress) {
-                                        if (progress == null) return child;
-                                        return Container(
-                                          color: accentColor
-                                              .withOpacity(0.08),
-                                          child: const Center(
-                                            child: SizedBox(
-                                              width: 18,
-                                              height: 18,
-                                              child:
-                                              CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                              ),
+                                      placeholder: (context, url) => Container(
+                                        color: accentColor.withOpacity(0.08),
+                                        child: const Center(
+                                          child: SizedBox(
+                                            width: 18,
+                                            height: 18,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
                                             ),
                                           ),
-                                        );
-                                      },
-                                      errorBuilder:
-                                          (context, error, stack) =>
-                                          Container(
-                                            color:
-                                            accentColor.withOpacity(0.08),
-                                            child: const Icon(
-                                                Icons.broken_image_outlined,
-                                                color: accentColor),
-                                          ),
+                                        ),
+                                      ),
+                                      errorWidget: (context, url, error) => Container(
+                                        color: accentColor.withOpacity(0.08),
+                                        child: const Icon(Icons.broken_image_outlined, color: accentColor),
+                                      ),
                                     ),
                                   ),
                                 ),

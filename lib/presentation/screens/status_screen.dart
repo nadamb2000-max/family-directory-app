@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'create_status_screen.dart';
 import 'status_model.dart';
 import 'status_viewer_screen.dart';
@@ -143,7 +144,7 @@ class _StatusCard extends StatelessWidget {
           radius: 18,
           backgroundColor: Colors.white.withOpacity(0.25),
           backgroundImage:
-          item.userPhoto.isNotEmpty ? NetworkImage(item.userPhoto) : null,
+          item.userPhoto.isNotEmpty ? CachedNetworkImageProvider(item.userPhoto) : null,
           child: item.userPhoto.isEmpty
               ? Text(item.userName.isNotEmpty ? item.userName[0] : '؟',
               style: const TextStyle(
@@ -211,7 +212,7 @@ class _StatusCard extends StatelessWidget {
           radius: 17,
           backgroundColor: Colors.white.withOpacity(0.3),
           backgroundImage:
-          item.userPhoto.isNotEmpty ? NetworkImage(item.userPhoto) : null,
+          item.userPhoto.isNotEmpty ? CachedNetworkImageProvider(item.userPhoto) : null,
           child: item.userPhoto.isEmpty
               ? Text(item.userName.isNotEmpty ? item.userName[0] : '؟',
               style: const TextStyle(
@@ -270,7 +271,15 @@ class _StatusCard extends StatelessWidget {
                       builder: (_) =>
                           StatusViewerScreen(status: item, isMe: isMe)),
                 ),
-                child: Image.network(item.imageUrl!, fit: BoxFit.cover),
+                child: CachedNetworkImage(
+                  imageUrl: item.imageUrl!,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    color: Colors.grey.withOpacity(0.1),
+                    child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                  ),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                ),
               ),
 
               // الشريط العلوي الزجاجي - يحمل الاسم والوقت والعداد

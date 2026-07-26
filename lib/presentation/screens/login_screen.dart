@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../widgets/custom_text_field.dart';
 import 'main_shell.dart';
 import 'register_screen.dart';
 
@@ -175,65 +176,21 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
 
                         // حقل الإيميل
-                        TextField(
+                        CustomTextField(
                           controller: _emailController,
+                          label: 'البريد الإلكتروني',
+                          icon: Icons.email_outlined,
                           keyboardType: TextInputType.emailAddress,
-                          autofillHints: const [AutofillHints.email],
-                          style: TextStyle(color: textColor, fontSize: 14),
-                          decoration: InputDecoration(
-                            labelText: 'البريد الإلكتروني',
-                            labelStyle: TextStyle(color: subTextColor, fontSize: 13),
-                            prefixIcon: Icon(Icons.email_outlined,
-                                color: const Color(0xFF2563EB), size: 20),
-                            filled: true,
-                            fillColor: fieldColor,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: BorderSide.none,
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: const BorderSide(
-                                  color: Color(0xFF2563EB), width: 1.5),
-                            ),
-                          ),
                         ),
                         const SizedBox(height: 12),
 
                         // حقل كلمة المرور
-                        TextField(
+                        CustomTextField(
                           controller: _passwordController,
+                          label: 'كلمة المرور',
+                          icon: Icons.lock_outline,
                           obscureText: _obscurePassword,
-                          autofillHints: const [AutofillHints.password],
-                          style: TextStyle(color: textColor, fontSize: 14),
-                          decoration: InputDecoration(
-                            labelText: 'كلمة المرور',
-                            labelStyle: TextStyle(color: subTextColor, fontSize: 13),
-                            prefixIcon: Icon(Icons.lock_outline,
-                                color: const Color(0xFF2563EB), size: 20),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
-                                color: subTextColor,
-                                size: 20,
-                              ),
-                              onPressed: () => setState(
-                                      () => _obscurePassword = !_obscurePassword),
-                            ),
-                            filled: true,
-                            fillColor: fieldColor,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: BorderSide.none,
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: const BorderSide(
-                                  color: Color(0xFF2563EB), width: 1.5),
-                            ),
-                          ),
+                          onToggleObscure: () => setState(() => _obscurePassword = !_obscurePassword),
                         ),
                         const SizedBox(height: 22),
 

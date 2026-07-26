@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'status_model.dart';
 
 class StatusViewerScreen extends StatelessWidget {
@@ -43,7 +44,12 @@ class StatusViewerScreen extends StatelessWidget {
           children: [
             if (status.imageUrl != null)
               Positioned.fill(
-                child: Image.network(status.imageUrl!, fit: BoxFit.contain),
+                child: CachedNetworkImage(
+                  imageUrl: status.imageUrl!,
+                  fit: BoxFit.contain,
+                  placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                  errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.white),
+                ),
               ),
             if (status.imageUrl == null)
               Container(
@@ -87,7 +93,7 @@ class StatusViewerScreen extends StatelessWidget {
                     radius: 18,
                     backgroundColor: Colors.white24,
                     backgroundImage: status.userPhoto.isNotEmpty
-                        ? NetworkImage(status.userPhoto)
+                        ? CachedNetworkImageProvider(status.userPhoto)
                         : null,
                     child: status.userPhoto.isEmpty
                         ? Text(

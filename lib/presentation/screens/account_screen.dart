@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'admin_screen.dart';
 import 'edit_profile_screen.dart';
 import 'login_screen.dart';
@@ -78,7 +79,7 @@ class AccountScreen extends StatelessWidget {
                       radius: 36,
                       backgroundColor: Colors.white24,
                       backgroundImage: hasProfileImage
-                          ? NetworkImage(profileImage!)
+                          ? CachedNetworkImageProvider(profileImage!)
                           : null,
                       child: hasProfileImage
                           ? null
