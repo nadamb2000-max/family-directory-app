@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/services/cloudinary_service.dart';
+import '../widgets/custom_toast.dart';
 
 class CreateStatusScreen extends StatefulWidget {
   const CreateStatusScreen({super.key});
@@ -42,8 +43,10 @@ class _CreateStatusScreenState extends State<CreateStatusScreen> {
   Future<void> _publishStatus() async {
     final text = _controller.text.trim();
     if (text.isEmpty && _selectedImage == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('اكتب نص أو اختر صورة للحالة')),
+      CustomToast.show(
+        context,
+        message: 'اكتب نص أو اختر صورة للحالة',
+        type: ToastType.info,
       );
       return;
     }
@@ -82,8 +85,10 @@ class _CreateStatusScreenState extends State<CreateStatusScreen> {
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('حدث خطأ أثناء نشر الحالة: $e')),
+        CustomToast.show(
+          context,
+          message: 'حدث خطأ أثناء نشر الحالة',
+          type: ToastType.error,
         );
       }
     } finally {

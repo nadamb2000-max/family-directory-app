@@ -7,6 +7,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../core/services/cloudinary_service.dart';
 import '../widgets/custom_text_field.dart';
+import '../widgets/custom_toast.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -62,8 +63,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('خطأ في تحميل البيانات')),
+        CustomToast.show(
+          context,
+          message: 'خطأ في تحميل البيانات',
+          type: ToastType.error,
         );
       }
     }
@@ -88,8 +91,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         _profileImageUrl = url;
         _uploadingProfile = false;
         if (url == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('فشل رفع الصورة')),
+          CustomToast.show(
+            context,
+            message: 'فشل رفع الصورة',
+            type: ToastType.error,
           );
         }
       });
@@ -110,8 +115,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         setState(() => _workImageUrls.add(url));
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('فشل رفع إحدى الصور')),
+          CustomToast.show(
+            context,
+            message: 'فشل رفع إحدى الصور',
+            type: ToastType.error,
           );
         }
       }
@@ -144,18 +151,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       }, SetOptions(merge: true));
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('تم حفظ البيانات بنجاح ✓'),
-            backgroundColor: Color(0xFF2563EB),
-          ),
+        CustomToast.show(
+          context,
+          message: 'تم حفظ البيانات بنجاح ✓',
+          type: ToastType.success,
         );
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('فشل الحفظ، حاول مرة أخرى')),
+        CustomToast.show(
+          context,
+          message: 'فشل الحفظ، حاول مرة أخرى',
+          type: ToastType.error,
         );
       }
     } finally {

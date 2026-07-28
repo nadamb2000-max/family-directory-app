@@ -7,6 +7,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../core/services/cloudinary_service.dart';
 import '../widgets/custom_text_field.dart';
+import '../widgets/custom_toast.dart';
 import 'main_shell.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -57,8 +58,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _profileImageUrl = url;
         _uploadingProfile = false;
         if (url == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('فشل رفع الصورة، حاول مرة أخرى')),
+          CustomToast.show(
+            context,
+            message: 'فشل رفع الصورة، حاول مرة أخرى',
+            type: ToastType.error,
           );
         }
       });
@@ -79,8 +82,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         setState(() => _workImageUrls.add(url));
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('فشل رفع إحدى الصور')),
+          CustomToast.show(
+            context,
+            message: 'فشل رفع إحدى الصور',
+            type: ToastType.error,
           );
         }
       }
