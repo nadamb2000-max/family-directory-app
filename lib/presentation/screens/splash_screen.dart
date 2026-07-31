@@ -267,10 +267,14 @@ class _SplashScreenState extends State<SplashScreen>
                                 width: 1.2,
                               ),
                             ),
-                            child: const Icon(
-                              Icons.family_restroom,
-                              size: 50,
-                              color: Colors.white,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(34),
+                              child: Image.asset(
+                                'assets/icon/app_icon.png',
+                                width: 80,
+                                height: 80,
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
                         ),
