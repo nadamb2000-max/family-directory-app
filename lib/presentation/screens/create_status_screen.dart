@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/services/cloudinary_service.dart';
+import '../../core/services/network_service.dart';
 import '../widgets/custom_toast.dart';
 
 class CreateStatusScreen extends StatefulWidget {
@@ -48,6 +49,19 @@ class _CreateStatusScreenState extends State<CreateStatusScreen> {
         message: 'اكتب نص أو اختر صورة للحالة',
         type: ToastType.info,
       );
+      return;
+    }
+
+    // فحص الإنترنت قبل البدء
+    final connected = await NetworkService.isConnected();
+    if (!connected) {
+      if (mounted) {
+        CustomToast.show(
+          context,
+          message: 'لا يوجد اتصال بالإنترنت، يرجى الاتصال للمتابعة',
+          type: ToastType.error,
+        );
+      }
       return;
     }
 

@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../core/services/cloudinary_service.dart';
+import '../../core/services/network_service.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_toast.dart';
 
@@ -132,6 +133,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _save() async {
+    // فحص الإنترنت قبل البدء
+    final connected = await NetworkService.isConnected();
+    if (!connected) {
+      if (mounted) {
+        CustomToast.show(
+          context,
+          message: 'لا يوجد اتصال بالإنترنت، يرجى الاتصال للمتابعة',
+          type: ToastType.error,
+        );
+      }
+      return;
+    }
+
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
 

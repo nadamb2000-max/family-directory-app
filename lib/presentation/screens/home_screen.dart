@@ -123,28 +123,39 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
             Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('users')
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return Center(
-                      child: Text('حدث خطأ في تحميل البيانات',
-                          style: TextStyle(color: textColor)),
-                    );
-                  }
-                  if (!snapshot.hasData) {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        color: const Color(0xFF2563EB),
-                        backgroundColor:
-                        const Color(0xFF2563EB).withOpacity(0.1),
-                      ),
-                    );
-                  }
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  // إجبار التحديث من السيرفر
+                  await FirebaseFirestore.instance.disableNetwork();
+                  await FirebaseFirestore.instance.enableNetwork();
+                },
+                color: const Color(0xFF2563EB),
+                backgroundColor: Colors.white,
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('users')
+                      .snapshots(includeMetadataChanges: true),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text('حدث خطأ في تحميل البيانات',
+                            style: TextStyle(color: textColor)),
+                      );
+                    }
+                    if (!snapshot.hasData) {
+                      return Center(
+                        child: CircularProgressIndicator(
+                          color: const Color(0xFF2563EB),
+                          backgroundColor:
+                          const Color(0xFF2563EB).withOpacity(0.1),
+                        ),
+                      );
+                    }
 
-                  final allDocs = snapshot.data!.docs;
+                    final allDocs = snapshot.data!.docs;
+                    // تفعيل الكاش: Firestore يقوم بذلك تلقائياً ولكن includeMetadataChanges يساعدنا
+                    // في معرفة إذا كانت البيانات قادمة من الكاش أم السيرفر (اختياري للعرض)
+
                   final myDoc = allDocs
                       .where((d) => d.id == currentUid)
                       .firstOrNull;
