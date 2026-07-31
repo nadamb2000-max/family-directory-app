@@ -122,25 +122,6 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            if (_isSearching)
-              Container(
-                color: appBarColor,
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                child: Row(
-                  children: [
-                    Icon(Icons.info_outline_rounded,
-                        size: 14,
-                        color: isDark ? Colors.white38 : Colors.grey),
-                    const SizedBox(width: 6),
-                    Text(
-                      'يمكنك البحث بالاسم أو المهنة أو رقم الهاتف',
-                      style: TextStyle(
-                          fontSize: 12,
-                          color: isDark ? Colors.white38 : Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
