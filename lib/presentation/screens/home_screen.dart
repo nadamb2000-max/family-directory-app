@@ -61,7 +61,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF0F4FF);
     final appBarColor = isDark ? const Color(0xFF1E293B) : Colors.white;
     final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
-    final subTextColor = isDark ? Colors.white60 : const Color(0xFF64748B);
     final currentUid = FirebaseAuth.instance.currentUser?.uid;
 
     return Scaffold(
@@ -69,290 +68,103 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: appBarColor,
         elevation: 0,
-        shadowColor: Colors.transparent,
-        surfaceTintColor: Colors.transparent,
         title: _isSearching
             ? TextField(
-          controller: _searchController,
-          autofocus: true,
-          onChanged: _onSearch,
-          style: TextStyle(color: textColor, fontSize: 15),
-          decoration: InputDecoration(
-            hintText: 'ابحث بالاسم أو المهنة أو الرقم...',
-            hintStyle: TextStyle(
-                color: isDark ? Colors.white38 : Colors.grey,
-                fontSize: 14),
-            border: InputBorder.none,
-          ),
-        )
+                controller: _searchController,
+                autofocus: true,
+                onChanged: _onSearch,
+                style: TextStyle(color: textColor, fontSize: 15),
+                decoration: InputDecoration(
+                  hintText: 'ابحث بالاسم أو المهنة أو الرقم...',
+                  hintStyle: TextStyle(
+                      color: isDark ? Colors.white38 : Colors.grey,
+                      fontSize: 14),
+                  border: InputBorder.none,
+                ),
+              )
             : Text('الرئيسية',
-            style: TextStyle(
-                color: textColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 18)),
+                style: TextStyle(
+                    color: textColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18)),
         centerTitle: !_isSearching,
         actions: [
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 200),
-            child: _isSearching
-                ? IconButton(
-              key: const ValueKey('close'),
-              icon: Icon(Icons.close_rounded,
-                  color: isDark
-                      ? Colors.white70
-                      : const Color(0xFF2563EB)),
-              onPressed: _toggleSearch,
-            )
-                : IconButton(
-              key: const ValueKey('search'),
-              icon: Container(
-                padding: const EdgeInsets.all(7),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2563EB).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.search_rounded,
-                    color: Color(0xFF2563EB), size: 20),
-              ),
-              onPressed: _toggleSearch,
-            ),
+          IconButton(
+            icon: Icon(_isSearching ? Icons.close_rounded : Icons.search_rounded,
+                color: const Color(0xFF2563EB)),
+            onPressed: _toggleSearch,
           ),
         ],
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: () async {
-                  // إجبار التحديث من السيرفر
-                  await FirebaseFirestore.instance.disableNetwork();
-                  await FirebaseFirestore.instance.enableNetwork();
-                },
-                color: const Color(0xFF2563EB),
-                backgroundColor: Colors.white,
-                child: StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('users')
-                      .snapshots(includeMetadataChanges: true),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return Center(
-                        child: Text('حدث خطأ في تحميل البيانات',
-                            style: TextStyle(color: textColor)),
-                      );
-                    }
-                    if (!snapshot.hasData) {
-                      return Center(
-                        child: CircularProgressIndicator(
-                          color: const Color(0xFF2563EB),
-                          backgroundColor:
-                          const Color(0xFF2563EB).withOpacity(0.1),
-                        ),
-                      );
-                    }
+        child: RefreshIndicator(
+          onRefresh: () async {
+            await FirebaseFirestore.instance.disableNetwork();
+            await FirebaseFirestore.instance.enableNetwork();
+          },
+          color: const Color(0xFF2563EB),
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('users')
+                .snapshots(includeMetadataChanges: true),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Center(child: Text('حدث خطأ في تحميل البيانات'));
+              }
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-                    final allDocs = snapshot.data!.docs;
-                    // تفعيل الكاش: Firestore يقوم بذلك تلقائياً ولكن includeMetadataChanges يساعدنا
-                    // في معرفة إذا كانت البيانات قادمة من الكاش أم السيرفر (اختياري للعرض)
+              final allDocs = snapshot.data!.docs;
+              final myDoc = allDocs.where((d) => d.id == currentUid).firstOrNull;
+              final otherDocs = allDocs.where((d) => d.id != currentUid).toList();
+              
+              final filteredOthers = otherDocs
+                  .where((d) => _matchesSearch(d.data() as Map<String, dynamic>))
+                  .toList();
+              
+              final myData = myDoc?.data() as Map<String, dynamic>?;
+              final showMe = myData != null && (_searchQuery.isEmpty || _matchesSearch(myData));
+              final totalCount = allDocs.length;
 
-                  final myDoc = allDocs
-                      .where((d) => d.id == currentUid)
-                      .firstOrNull;
-                  final otherDocs =
-                  allDocs.where((d) => d.id != currentUid).toList();
-                  final filteredOthers = otherDocs
-                      .where((d) =>
-                      _matchesSearch(d.data() as Map<String, dynamic>))
-                      .toList();
-                  final myData = myDoc?.data() as Map<String, dynamic>?;
-                  final myMatchesSearch =
-                      myData != null && _matchesSearch(myData);
-                  final showMe = myData != null &&
-                      (_searchQuery.isEmpty || myMatchesSearch);
-                  final totalCount = allDocs.length;
-
-                  return ListView(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-                    children: [
-                      if (!_isSearching) ...[
-                        Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF2563EB), Color(0xFF8B5CF6)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(32),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF2563EB).withOpacity(0.35),
-                                blurRadius: 20,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'مرحبًا بك في روافدكم 👨‍👩‍👧‍👦',
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Text(
-                                        '$totalCount فرد من العائلة',
-                                        style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.all(14),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: const Icon(Icons.people_alt_rounded,
-                                    color: Colors.white, size: 32),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 28),
-                        Row(
-                          children: [
-                            Container(
-                              width: 4,
-                              height: 20,
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [Color(0xFF2563EB), Color(0xFF8B5CF6)],
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                ),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Text('أفراد العائلة',
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: textColor)),
-                          ],
-                        ),
-                        const SizedBox(height: 14),
-                      ],
-
-                      if (showMe)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: _MemberCard(
-                            data: myData!,
-                            isMe: true,
-                            onTap: () {
-                              final member = _toFamilyMember(myData);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) =>
-                                        MemberDetailScreen(member: member)),
-                              );
-                            },
-                            onWhatsApp: () =>
-                                _openWhatsApp(myData['phone'] ?? ''),
-                            isDark: isDark,
-                          ),
-                        ),
-
-                      if (_isSearching && filteredOthers.isEmpty && !showMe)
-                        Center(
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 60),
-                            child: Column(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(24),
-                                  decoration: BoxDecoration(
-                                    color: isDark
-                                        ? const Color(0xFF1E293B)
-                                        : Colors.white,
-                                    borderRadius: BorderRadius.circular(32),
-                                  ),
-                                  child: Icon(Icons.search_off_rounded,
-                                      size: 56,
-                                      color: isDark
-                                          ? Colors.white24
-                                          : const Color(0xFF2563EB)
-                                          .withOpacity(0.3)),
-                                ),
-                                const SizedBox(height: 16),
-                                Text('لا توجد نتائج',
-                                    style: TextStyle(
-                                        color: isDark
-                                            ? Colors.white38
-                                            : subTextColor,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600)),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                      ...filteredOthers.map((doc) {
-                        final data = doc.data() as Map<String, dynamic>;
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: _MemberCard(
-                            data: data,
-                            isMe: false,
-                            onTap: () {
-                              final member = _toFamilyMember(data);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) =>
-                                        MemberDetailScreen(member: member)),
-                              );
-                            },
-                            onWhatsApp: () =>
-                                _openWhatsApp(data['phone'] ?? ''),
-                            isDark: isDark,
-                          ),
-                        );
-                      }),
-                    ],
-                  );
-                },
-              ),
-            ),
-          ],
+              return ListView(
+                padding: const EdgeInsets.all(20),
+                children: [
+                  if (!_isSearching) ...[
+                    _HeaderCard(totalCount: totalCount),
+                    const SizedBox(height: 28),
+                    _SectionTitle(title: 'أفراد العائلة'),
+                    const SizedBox(height: 14),
+                  ],
+                  if (showMe)
+                    _MemberCard(
+                      data: myData!,
+                      isMe: true,
+                      isDark: isDark,
+                      onTap: () => _navigateToDetail(context, myData),
+                      onWhatsApp: () => _openWhatsApp(myData['phone'] ?? ''),
+                    ),
+                  ...filteredOthers.map((doc) {
+                    final data = doc.data() as Map<String, dynamic>;
+                    return _MemberCard(
+                      data: data,
+                      isMe: false,
+                      isDark: isDark,
+                      onTap: () => _navigateToDetail(context, data),
+                      onWhatsApp: () => _openWhatsApp(data['phone'] ?? ''),
+                    );
+                  }),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
   }
 
-  FamilyMember _toFamilyMember(Map<String, dynamic> data) {
-    return FamilyMember(
+  void _navigateToDetail(BuildContext context, Map<String, dynamic> data) {
+    final member = FamilyMember(
       name: data['name'] ?? '',
       profession: data['profession'] ?? '',
       bio: data['bio'] ?? '',
@@ -363,199 +175,120 @@ class _HomeScreenState extends State<HomeScreen> {
       avatarColor: const Color(0xFF2563EB),
       profileImage: data['profileImage'],
     );
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => MemberDetailScreen(member: member)),
+    );
+  }
+}
+
+class _HeaderCard extends StatelessWidget {
+  final int totalCount;
+  const _HeaderCard({required this.totalCount});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF2563EB), Color(0xFF8B5CF6)],
+        ),
+        borderRadius: BorderRadius.circular(32),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('مرحبًا بك في روافدكم 👨‍👩‍👧‍👦',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                Text('$totalCount فرد من العائلة',
+                    style: const TextStyle(color: Colors.white70, fontSize: 12)),
+              ],
+            ),
+          ),
+          const Icon(Icons.people_alt_rounded, color: Colors.white, size: 32),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String title;
+  const _SectionTitle({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(width: 4, height: 20, color: const Color(0xFF2563EB)),
+        const SizedBox(width: 10),
+        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+      ],
+    );
   }
 }
 
 class _MemberCard extends StatelessWidget {
   final Map<String, dynamic> data;
   final bool isMe;
+  final bool isDark;
   final VoidCallback onTap;
   final VoidCallback onWhatsApp;
-  final bool isDark;
 
   const _MemberCard({
     required this.data,
     required this.isMe,
+    required this.isDark,
     required this.onTap,
     required this.onWhatsApp,
-    required this.isDark,
   });
 
   @override
   Widget build(BuildContext context) {
-    final cardColor = isDark ? const Color(0xFF1E293B) : Colors.white;
-    final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
-    final subTextColor = isDark ? Colors.white60 : const Color(0xFF64748B);
-    const accentColor = Color(0xFF2563EB);
-
+    final accentColor = const Color(0xFF2563EB);
     final name = data['name'] ?? '';
-    final profession = data['profession'] ?? '';
-    final location = data['location'] ?? '';
-    final phone = data['phone'] ?? '';
-    final String? profileImage = data['profileImage'];
-    final initial = name.isNotEmpty ? name[0] : '?';
+    final profileImage = data['profileImage'];
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isMe ? null : cardColor,
-          gradient: isMe
-              ? LinearGradient(
-            colors: isDark
-                ? [const Color(0xFF1E3A5F), const Color(0xFF2D1B69)]
-                : [const Color(0xFFEFF6FF), const Color(0xFFF5F3FF)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          )
-              : null,
+          color: isDark ? const Color(0xFF1E293B) : Colors.white,
           borderRadius: BorderRadius.circular(28),
-          border: isMe
-              ? Border.all(color: accentColor.withOpacity(0.3), width: 1.5)
-              : null,
-          boxShadow: [
-            BoxShadow(
-              color: isMe
-                  ? accentColor.withOpacity(0.15)
-                  : (isDark
-                  ? Colors.black26
-                  : const Color(0xFF2563EB).withOpacity(0.06)),
-              blurRadius: isMe ? 20 : 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
+          border: isMe ? Border.all(color: accentColor.withValues(alpha: 0.3), width: 1.5) : null,
         ),
         child: Row(
           children: [
-            Stack(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: isMe
-                      ? BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF2563EB), Color(0xFF8B5CF6)],
-                    ),
-                    borderRadius: BorderRadius.circular(34),
-                  )
-                      : null,
-                  child: CircleAvatar(
-                    radius: 28,
-                    backgroundColor: accentColor.withOpacity(isDark ? 0.3 : 0.1),
-                    backgroundImage: (profileImage != null && profileImage.isNotEmpty)
-                        ? CachedNetworkImageProvider(profileImage)
-                        : null,
-                    child: (profileImage == null || profileImage.isEmpty)
-                        ? Text(
-                            initial,
-                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: accentColor),
-                          )
-                        : null,
-                  ),
-                ),
-                if (isMe)
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 5, vertical: 2),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF2563EB), Color(0xFF8B5CF6)],
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                        boxShadow: [
-                          BoxShadow(
-                            color: accentColor.withOpacity(0.4),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: const Text('أنت',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-              ],
+            CircleAvatar(
+              radius: 28,
+              backgroundImage: (profileImage != null && profileImage.isNotEmpty)
+                  ? CachedNetworkImageProvider(profileImage)
+                  : null,
+              child: (profileImage == null || profileImage.isEmpty)
+                  ? Text(name.isNotEmpty ? name[0] : '?')
+                  : null,
             ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(name.isNotEmpty ? name : 'بدون اسم',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          color: textColor)),
-                  const SizedBox(height: 4),
-                  if (profession.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: accentColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.work_outline_rounded,
-                              size: 11, color: accentColor),
-                          const SizedBox(width: 4),
-                          Text(profession,
-                              style: const TextStyle(
-                                  color: accentColor,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600)),
-                        ],
-                      ),
-                    ),
-                  const SizedBox(height: 4),
-                  if (location.isNotEmpty)
-                    Row(
-                      children: [
-                        Icon(Icons.location_on_outlined,
-                            size: 12, color: subTextColor),
-                        const SizedBox(width: 3),
-                        Text(location,
-                            style:
-                            TextStyle(color: subTextColor, fontSize: 11)),
-                      ],
-                    ),
+                  Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(data['profession'] ?? '', style: const TextStyle(fontSize: 12, color: Colors.grey)),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
-            if (phone.isNotEmpty)
-              GestureDetector(
-                onTap: onWhatsApp,
-                child: Container(
-                  padding: const EdgeInsets.all(9),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF25D366)
-                        .withOpacity(isDark ? 0.2 : 0.1),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: const Icon(Icons.chat_rounded,
-                      color: Color(0xFF25D366), size: 20),
-                ),
+            if (data['phone'] != null)
+              IconButton(
+                icon: const Icon(Icons.chat_rounded, color: Color(0xFF25D366)),
+                onPressed: onWhatsApp,
               ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: accentColor.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(Icons.arrow_forward_ios_rounded,
-                  size: 12, color: accentColor.withOpacity(0.6)),
-            ),
           ],
         ),
       ),
