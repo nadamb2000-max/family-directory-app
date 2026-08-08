@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shimmer/shimmer.dart';
 import 'member_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -112,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 return Center(child: Text('حدث خطأ في تحميل البيانات'));
               }
               if (!snapshot.hasData) {
-                return const Center(child: CircularProgressIndicator());
+                return _buildSkeletonLoader(isDark);
               }
 
               final allDocs = snapshot.data!.docs;
@@ -178,6 +179,43 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => MemberDetailScreen(member: member)),
+    );
+  }
+
+  Widget _buildSkeletonLoader(bool isDark) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(20),
+      itemCount: 6,
+      itemBuilder: (context, index) {
+        return Shimmer.fromColors(
+          baseColor: isDark ? const Color(0xFF1E293B) : Colors.grey[300]!,
+          highlightColor: isDark ? const Color(0xFF334155) : Colors.grey[100]!,
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(28),
+            ),
+            child: Row(
+              children: [
+                const CircleAvatar(radius: 28, backgroundColor: Colors.white),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(width: 120, height: 14, color: Colors.white),
+                      const SizedBox(height: 8),
+                      Container(width: 80, height: 10, color: Colors.white),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
